@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} Workflow SAST, SCA & Imagen Vuln 🚀
 on:
   push:
     branches:
-      - develop  # Solo se ejecuta en pushes a la rama principal
+      - develop  # Solo se  ejecuta en pushes a la rama principal
 
 jobs:
   AnalisisDeSeguridad:
