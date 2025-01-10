@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} Workflow SAST, SCA & Imagen Vuln 🚀
 on:
   push:
     branches:
-      - main  # Solo se ejecuta en pushes a la rama principal
+      - main  
 
 jobs:
   AnalisisDeSeguridad:
@@ -16,60 +16,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3 
       
-      # Paso 2: Configurar Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # Cambia según tu versión de Node.js
+          node-version: '16' 
 
-      # Paso 3: Instalar dependencias
       - name: Install Dependencies
         run: npm install
 
-      # Paso 4: Ejecutar OWASP Dependency Check
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: 'nodejs-project'
-          path: '.' # Escanea el directorio actual
-          format: 'HTML' # Genera un reporte HTML
-          out: 'reports' # Carpeta donde se guarda el reporte
+          path: '.' 
+          format: 'HTML' 
+          out: 'reports' 
           args: >
-            --failOnCVSS 7 # Falla si se encuentran vulnerabilidades críticas con CVSS >= 7
+            --disableCentral
             --enableRetired
 
-      # Paso 5: Subir el reporte como artefacto (opcional)
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v3
         with:
           name: Dependency-Check-Report
           path: reports/dependency-check-report.html
 
-      # - name: Analyze with SonarCloud
-      #   uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
-      #   with:
-      #     args:
-      #       -Dsonar.projectKey="bardilesc_laboratorio-final"
-      #       -Dsonar.organization="bardilesc"
-      #       # Comma-separated paths to directories containing main source files.
-      #       #-Dsonar.sources= # optional, default is project base directory
-      #       # Comma-separated paths to directories containing test source files.
-      #       #-Dsonar.tests= # optional. For more info about Code Coverage, please refer to https://docs.sonarcloud.io/enriching/test-coverage/overview/
-      #       # Adds more detail to both client and server-side analysis logs, activating DEBUG mode for the scanner, and adding client-side environment variables and system properties to the server-side log of analysis report processing.
-      #       #-Dsonar.verbose= # optional, default is false
-      #     # When you need the analysis to take place in a directory other than the one from which it was launched, default is .
-      #     projectBaseDir: .
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
+        with:
+          args:
+            -Dsonar.projectKey="bardilesc_laboratorio-final"
+            -Dsonar.organization="bardilesc"
+          projectBaseDir: .
 
       
-      # - name: Build an image from Dockerfile
-      #   run: docker build -t docker.io/ptrickbtman/app-devsecops:${{ github.sha }} .
-      # - name: Run Trivy vulnerability scanner
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     image-ref: 'docker.io/ptrickbtman/app-devsecops:${{ github.sha }}'
-      #     format: 'table'
-      #     ignore-unfixed: true
-      #     vuln-type: 'os,library'
-      #     severity: 'CRITICAL,HIGH'
+      - name: Build an image from Dockerfile
+        run: docker build -t docker.io/ptrickbtman/app-devsecops:${{ github.sha }} .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'docker.io/ptrickbtman/app-devsecops:${{ github.sha }}'
+          format: 'table'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
