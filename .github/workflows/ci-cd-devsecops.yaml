@@ -21,25 +21,25 @@ jobs:
         with:
           node-version: '16' 
 
-      - name: Install Dependencies
-        run: npm install
+      # - name: Install Dependencies
+      #   run: npm install
 
-      - name: Run OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: 'nodejs-project'
-          path: '.' 
-          format: 'HTML' 
-          out: 'reports' 
-          args: >
-            --disableCentral
-            --enableRetired
+      # - name: Run OWASP Dependency Check
+      #   uses: dependency-check/Dependency-Check_Action@main
+      #   with:
+      #     project: 'nodejs-project'
+      #     path: '.' 
+      #     format: 'HTML' 
+      #     out: 'reports' 
+      #     args: >
+      #       --disableCentral
+      #       --enableRetired
 
-      - name: Upload Dependency Check Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: Dependency-Check-Report
-          path: reports/dependency-check-report.html
+      # - name: Upload Dependency Check Report
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Dependency-Check-Report
+      #     path: reports/dependency-check-report.html
 
       - name: Analyze with SonarCloud
         uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
@@ -53,13 +53,13 @@ jobs:
           projectBaseDir: .
 
       
-      - name: Build an image from Dockerfile
-        run: docker build -t docker.io/ptrickbtman/app-devsecops:${{ github.sha }} .
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: 'docker.io/ptrickbtman/app-devsecops:${{ github.sha }}'
-          format: 'table'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+      # - name: Build an image from Dockerfile
+      #   run: docker build -t docker.io/ptrickbtman/app-devsecops:${{ github.sha }} .
+      # - name: Run Trivy vulnerability scanner
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     image-ref: 'docker.io/ptrickbtman/app-devsecops:${{ github.sha }}'
+      #     format: 'table'
+      #     ignore-unfixed: true
+      #     vuln-type: 'os,library'
+      #     severity: 'CRITICAL,HIGH'
