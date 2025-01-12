@@ -18,9 +18,11 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       
       - name: Debug branch name
-        env:
-          BRANCH_NAME: ${{ github.ref_name }}
-        run: echo "Branch name: $BRANCH_NAME"
+        run: |
+          echo "Full ref: $GITHUB_REF"
+          BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+          echo "Branch name: $BRANCH_NAME"
+
 
       - name: Checkout code
         uses: actions/checkout@v3 
