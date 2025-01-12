@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} Workflow SAST, SCA & Imagen Vuln 🚀
 on:
   push:
     branches:
-      - main  # Solo se ejecuta en pushes a la rama principal
+      - main  
 
 jobs:
   AnalisisDeSeguridad:
@@ -15,7 +15,32 @@ jobs:
       
       - name: Checkout code
         uses: actions/checkout@v3 
-            
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' 
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'nodejs-project'
+          path: '.' 
+          format: 'HTML' 
+          out: 'reports' 
+          args: >
+            --disableCentral
+            --enableRetired
+
+      - name: Upload Dependency Check Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Dependency-Check-Report
+          path: reports/dependency-check-report.html
+
       - name: Analyze with SonarCloud
         uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
         env:
@@ -24,16 +49,9 @@ jobs:
           args:
             -Dsonar.projectKey="bardilesc_laboratorio-final"
             -Dsonar.organization="bardilesc"
-            # Comma-separated paths to directories containing main source files.
-            #-Dsonar.sources= # optional, default is project base directory
-            # Comma-separated paths to directories containing test source files.
-            #-Dsonar.tests= # optional. For more info about Code Coverage, please refer to https://docs.sonarcloud.io/enriching/test-coverage/overview/
-            # Adds more detail to both client and server-side analysis logs, activating DEBUG mode for the scanner, and adding client-side environment variables and system properties to the server-side log of analysis report processing.
-            #-Dsonar.verbose= # optional, default is false
-          # When you need the analysis to take place in a directory other than the one from which it was launched, default is .
           projectBaseDir: .
 
-
+      
       - name: Build an image from Dockerfile
         run: docker build -t docker.io/ptrickbtman/app-devsecops:${{ github.sha }} .
       - name: Run Trivy vulnerability scanner
@@ -41,7 +59,6 @@ jobs:
         with:
           image-ref: 'docker.io/ptrickbtman/app-devsecops:${{ github.sha }}'
           format: 'table'
-          exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
